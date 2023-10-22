@@ -8,20 +8,8 @@ import Lista from '../views/Projetos/Lista.vue'
 const rotas: RouteRecordRaw[] = [
     {
         path: '/',
+        name: 'Tarefas',
         component: Tarefas,
-        children: [
-            {
-                path: '',
-                name: 'Tarefas',
-                component: FormularioTarefa
-            },
-            {
-                path: ':id',
-                name: 'Editar Tarefa',
-                component: FormularioTarefa,
-                props: true
-            }
-        ]
     },
     {
         path: '/projetos',

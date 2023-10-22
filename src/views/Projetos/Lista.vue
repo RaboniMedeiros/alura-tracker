@@ -39,9 +39,9 @@
 <script lang="ts">
 import { defineComponent, computed } from "vue";
 import { useStore } from "@/store"
-import { EXCLUIR_PROJETO } from "@/store/tipo-mutacoes";
 import useNotificador from '@/hooks/notificador';
 import { TipoNotificacao } from '@/interfaces/INotificacao';
+import { OBTER_PROJETOS, REMOVER_PROJETO } from "@/store/tipo-acoes";
 
 /* eslint-disable vue/multi-word-component-names */
 
@@ -49,15 +49,18 @@ export default defineComponent({
     name: 'Lista',
     methods: {
         excluir (id: string) {
-            this.store.commit(EXCLUIR_PROJETO, id)
-            this.notificar(TipoNotificacao.ATENCAO, 'Projeto Excluído', 'O projeto foi excluído com sucesso!')
+            this.store.dispatch(REMOVER_PROJETO, id)
+                .then(() => {
+                    this.notificar(TipoNotificacao.ATENCAO, 'Projeto Excluído', 'O projeto foi excluído com sucesso!')
+                })
         }
     },
     setup() {
         const store = useStore()
+        store.dispatch(OBTER_PROJETOS)
         const { notificar } = useNotificador()
         return {
-            projetos: computed(() => store.state.projetos),
+            projetos: computed(() => store.state.projeto.projetos),
             store,
             notificar
         }

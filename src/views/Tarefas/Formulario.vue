@@ -24,79 +24,59 @@
 
 <script lang="ts">
 
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import Temporizador from '@/components/Temporizador.vue';
 import { useStore } from 'vuex';
 import ITarefa from '@/interfaces/ITarefa'
 import { key } from '@/store'
-import { ADICIONA_TAREFA, ALTERA_TAREFA, NOTIFICAR } from '@/store/tipo-mutacoes';
 import { TipoNotificacao } from '@/interfaces/INotificacao';
 import useNotificador from '@/hooks/notificador';
+import { CADASTRAR_TAREFA } from '@/store/tipo-acoes';
+import { useRouter } from 'vue-router';
 
 /* eslint-disable vue/multi-word-component-names */
 
 export default defineComponent({
     name: 'Formulario',
-    props: {
-        id: {
-            type: String
-        }
-    },
-    mounted() {
-        if (this.id) {
-            const tarefa = this.store.state.tarefas.find(tar => tar.id == this.id)
-            this.descricao = tarefa?.descricao || ''
-        }
-    },
     components: {
         Temporizador
     },
-    data() {
-        return {
-            descricao: '',
-            idProjeto: ''
-        }
-    },
-    methods: {
-        finalizarTarefa(tempoDecorrido: number): void {
-            if (this.id) {
-                const tarefa = {
-                    id: this.id,
-                    duracaoEmSegundos: tempoDecorrido,
-                    descricao: this.descricao,
-                    projeto: this.projetos.find(proj => proj.id == this.idProjeto)
-                } as ITarefa
-                this.store.commit(ALTERA_TAREFA, tarefa)
-                this.notificar(TipoNotificacao.SUCESSO, 'Excelente!', 'A tarefa foi alterada com sucesso!')
-                this.descricao = '';
-                this.$router.push('/')
-            } else {
-                if (this.idProjeto) {
-                    const tarefa = {
-                        id: new Date().toISOString(),
-                        duracaoEmSegundos: tempoDecorrido,
-                        descricao: this.descricao,
-                        projeto: this.projetos.find(proj => proj.id == this.idProjeto)
-                    } as ITarefa
-                    this.store.commit(ADICIONA_TAREFA, tarefa)
-                    this.notificar(TipoNotificacao.SUCESSO, 'Excelente!', 'A tarefa foi cadastrada com sucesso!')
-                    this.descricao = ''
-                    this.$router.push('/')
-                } else {
-                    this.notificar(TipoNotificacao.FALHA, 'Tarefa sem projeto vinculado', 'Não há projeto vinculado a esta tarefa! Tente novamente!')
-                }
+    setup() {
+        const router = useRouter();
+        const store = useStore(key);
+        const projetos = computed(() => store.state.projeto.projetos)
+        const { notificar } = useNotificador();
+        const descricao = ref("");
+        const idProjeto = ref("");
 
+        const finalizarTarefa = (tempoDecorrido: number) => {
+            if (idProjeto.value) {
+                const tarefa = {
+                    id: new Date().getTime(),
+                    duracaoEmSegundos: tempoDecorrido,
+                    descricao: descricao.value,
+                    projeto: projetos.value.find(proj => proj.id == idProjeto.value)
+                } as ITarefa
+                store.dispatch(CADASTRAR_TAREFA, tarefa)
+                    .then(() => {
+                        lidarComSucesso(TipoNotificacao.SUCESSO, 'Excelente!', 'A tarefa foi cadastrada com sucesso!')
+                    })
+            } else {
+                notificar(TipoNotificacao.FALHA, 'Tarefa sem projeto vinculado', 'Não há projeto vinculado a esta tarefa! Tente novamente!')
             }
         }
-    },
-    setup() {
-        const store = useStore(key)
-        const { notificar } = useNotificador()
+
+        const lidarComSucesso = (TipoNotificacao: TipoNotificacao, titulo: string, texto: string) => {
+            descricao.value = '';
+            router.push('/')
+            notificar(TipoNotificacao, titulo, texto)
+        }
+
         return {
-            projetos: computed(() => store.state.projetos),
-            tarefas: computed(() => store.state.tarefas),
-            store,
-            notificar
+            descricao,
+            idProjeto,
+            projetos,
+            finalizarTarefa
         }
     }
 });

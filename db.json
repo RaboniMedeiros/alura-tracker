@@ -1,0 +1,36 @@
+{
+  "projetos": [
+    {
+      "id": 1,
+      "nome": "Alura Tracker 3.0"
+    },
+    {
+      "id": 2,
+      "nome": "Vue JS"
+    },
+    {
+      "id": 3,
+      "nome": "Estudando Padrões de Projeto"
+    }
+  ],
+  "tarefas": [
+    {
+      "id": 1697877013740,
+      "duracaoEmSegundos": 3,
+      "descricao": "Testa",
+      "projeto": {
+        "id": 1,
+        "nome": "Alura Tracker 3.0"
+      }
+    },
+    {
+      "id": 1697933796177,
+      "duracaoEmSegundos": 2,
+      "descricao": "Testes",
+      "projeto": {
+        "id": 1,
+        "nome": "Alura Tracker 3.0"
+      }
+    }
+  ]
+}
